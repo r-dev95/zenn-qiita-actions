@@ -81,7 +81,7 @@ const convertServiceLink = (content: string): string => {
  */
 const convertCustomBlock = (md: string): string => {
   let newContent = md.replace(/:::message/g, ":::note info");
-  newContent = newContent.replace(/:::alert/g, ":::note alert");
+  newContent = newContent.replace(/:::message alert/g, ":::note alert");
   return newContent;
 };
 
