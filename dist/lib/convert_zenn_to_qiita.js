@@ -71,8 +71,8 @@ const convertServiceLink = (content) => {
  * @returns Converted markdown
  */
 const convertCustomBlock = (md) => {
-    let newContent = md.replace(/:::message/g, ":::note info");
-    newContent = newContent.replace(/:::alert/g, ":::note alert");
+    let newContent = md.replace(/:::message alert/g, ":::note alert");
+    newContent = newContent.replace(/:::message/g, ":::note info");
     return newContent;
 };
 /**
@@ -85,7 +85,10 @@ const convertCustomBlock = (md) => {
  */
 const convertAccordion = (md) => {
     return md.replace(/^:::details\s+(.*)\n([\s\S]*?)^:::\s*$/gm, (_match, title, content) => {
-        return `<details><summary>${title}</summary>\n${content.trim()}\n</details>\n`;
+        console.log(" = " + content);
+        return `<details><summary>${title}</summary>\n${content
+            .trim()
+            .replace(/\n/g, "\n\n")}\n</details>\n`;
     });
 };
 /**

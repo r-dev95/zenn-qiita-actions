@@ -80,8 +80,8 @@ const convertServiceLink = (content: string): string => {
  * @returns Converted markdown
  */
 const convertCustomBlock = (md: string): string => {
-  let newContent = md.replace(/:::message/g, ":::note info");
-  newContent = newContent.replace(/:::message alert/g, ":::note alert");
+  let newContent = md.replace(/:::message alert/g, ":::note alert");
+  newContent = newContent.replace(/:::message/g, ":::note info");
   return newContent;
 };
 
@@ -97,7 +97,10 @@ const convertAccordion = (md: string): string => {
   return md.replace(
     /^:::details\s+(.*)\n([\s\S]*?)^:::\s*$/gm,
     (_match, title, content) => {
-      return `<details><summary>${title}</summary>\n${content.trim()}\n</details>\n`;
+      console.log(" = " + content);
+      return `<details><summary>${title}</summary>\n${content
+        .trim()
+        .replace(/\n/g, "\n\n")}\n</details>\n`;
     }
   );
 };
