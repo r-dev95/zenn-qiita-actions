@@ -97,7 +97,10 @@ const convertAccordion = (md: string): string => {
   return md.replace(
     /^:::details\s+(.*)\n([\s\S]*?)^:::\s*$/gm,
     (_match, title, content) => {
-      return `<details><summary>${title}</summary>\n${content.trim()}\n</details>\n`;
+      console.log(" = " + content);
+      return `<details><summary>${title}</summary>\n${content
+        .trim()
+        .replace(/\n/g, "\n\n")}\n</details>\n`;
     }
   );
 };
