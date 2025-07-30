@@ -80,8 +80,8 @@ const convertServiceLink = (content: string): string => {
  * @returns Converted markdown
  */
 const convertCustomBlock = (md: string): string => {
-  let newContent = md.replace(/:::message/g, ":::note info");
-  newContent = newContent.replace(/:::message alert/g, ":::note alert");
+  let newContent = md.replace(/:::message alert/g, ":::note alert");
+  newContent = newContent.replace(/:::message/g, ":::note info");
   return newContent;
 };
 
