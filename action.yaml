@@ -48,8 +48,6 @@ runs:
 
     - name: Run converter
       run: |
-        ls -laG ${{ inputs.zenn-repo-name }}
-        ls -laG ${{ inputs.qiita-repo-name }}
         if [ ${{ inputs.push-to-repo-name == inputs.qiita-repo-name }} ]; then
           node zenn-qiita-actions/dist/index.js 0 ${{ inputs.zenn-repo-name }}/articles ${{ inputs.qiita-repo-name }}/public ${{ inputs.json-path }}
         elif [ ${{ inputs.push-to-repo-name == inputs.zenn-repo-name }} ]; then
