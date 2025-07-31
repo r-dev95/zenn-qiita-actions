@@ -2,6 +2,8 @@
  * A set of functions to convert markdown from Zenn to Qiita format.
  */
 
+import { AppConfig } from "./types";
+
 /**
  * Convert diff code block.
  *
@@ -50,13 +52,10 @@ const convertMarkdownImagesToImgTags = (md: string): string => {
       // Remove captions (e.g., *caption*) after image
       .replace(/(!\[.*?\]\(.*?\))\n\*.*?\*/g, "$1")
       // Convert markdown image to <img>, handling optional size (e.g., =300x)
-      .replace(
-        /!\[(.*?)\]\((.*?)(?:\s*=\s*(\d*)x\d*)?\)/g,
-        (_match, alt, url, width) => {
-          const widthAttr = width ? ` width="${width}"` : "";
-          return `<img src="${url}" alt="${alt}"${widthAttr}>`;
-        }
-      )
+      .replace(/!\[(.*?)\]\((.*?)(?:\s*=\s*(\d*)x\d*)?\)/g, (_match, alt, url, width) => {
+        const widthAttr = width ? ` width="${width}"` : "";
+        return `<img src="${url}" alt="${alt}"${widthAttr}>`;
+      })
   );
 };
 
@@ -94,29 +93,40 @@ const convertCustomBlock = (md: string): string => {
  * @returns Converted markdown
  */
 const convertAccordion = (md: string): string => {
-  return md.replace(
-    /^:::details\s+(.*)\n([\s\S]*?)^:::\s*$/gm,
-    (_match, title, content) => {
-      console.log(" = " + content);
-      return `<details><summary>${title}</summary>\n${content
-        .trim()
-        .replace(/\n/g, "\n\n")}\n</details>\n`;
-    }
-  );
+  return md.replace(/^:::details\s+(.*)\n([\s\S]*?)^:::\s*$/gm, (_match, title, content) => {
+    return `<details><summary>${title}</summary>\n${content.trim().replace(/\n/g, "\n\n")}\n</details>\n`;
+  });
 };
 
-/**
- * Convert markdown from Zenn to Qiita format.
- * @param md Markdown to be converted
- * @returns Converted markdown
- */
-export const convertZennToQiita = (md: string): string => {
+export const convertContentsZennToQiita = (config: AppConfig): Array<CallableFunction> => {
+  let funcs = [convertDiffCodeBlock, convertServiceLink, convertCustomBlock, convertAccordion];
+  if (config.imageFormat === "img-tag") {
+    funcs.push(convertMarkdownImagesToImgTags);
+  } else {
+    funcs.push(convertMarkdownImages);
+  }
+  return funcs;
+};
+
+export const convertMetaDataZennToQiita = (data: any): string => {
+  const title = `${data.emoji ? data.emoji + " " : ""}${data.title}`;
+  let tags = "[]";
+  if (data.topics && Array.isArray(data.topics) && data.topics.length > 0) {
+    tags = "\n" + data.topics.map((tag: string) => `  - ${tag}`).join("\n");
+  }
+  const privateFlag = data.published === false;
+
   return [
-    convertDiffCodeBlock,
-    // convertMarkdownImages,
-    convertMarkdownImagesToImgTags,
-    convertServiceLink,
-    convertCustomBlock,
-    convertAccordion,
-  ].reduce((acc, fn) => fn(acc), md);
+    "---",
+    `title: ${title}`,
+    `tags: ${tags}`,
+    `private: ${privateFlag}`,
+    `updated_at: ""`,
+    `id: null`,
+    `organization_url_name: null`,
+    `slide: false`,
+    `ignorePublish: false`,
+    "---",
+    "",
+  ].join("\n");
 };

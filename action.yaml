@@ -5,21 +5,25 @@ description: |
   Converts <qiita repository>/public/*.md to <zenn repository>/articles/*.md and pushes
 
 inputs:
-  zenn-path:
-    description: Zenn repository path
+  zenn-repo-name:
+    description: Zenn repository name
     required: true
-  qiita-path:
-    description: Qiita repository path
+  qiita-repo-name:
+    description: Qiita repository name
     required: true
-  push-to-path:
-    description: Repository path to push (<inputs.zenn-path> or <inputs.qiita-path>)
+  push-to-repo-name:
+    description: Repository path to push (<inputs.zenn-repo-name> or <inputs.qiita-repo-name>)
     required: true
   commit-msg:
-    description: Massage to commit to <inputs.push-to-path>
+    description: Massage to commit to <inputs.push-to-repo-name>
     required: true
   git-token:
-    description: GitHub token to push to <inputs.push-to-path>
+    description: GitHub token to push to <inputs.push-to-repo-name>
     required: true
+  json-path:
+    description: GitHub token to push to <inputs.push-to-repo-name>
+    required: false
+    default: "src/zenn-qiita-actions.json"
 
 runs:
   using: composite
@@ -44,22 +48,28 @@ runs:
 
     - name: Run converter
       run: |
-        if [ ${{ inputs.push-to-path }} = ${{ inputs.qiita-path }} ]; then
-          node zenn-qiita-actions/dist/index.js ./${{ inputs.zenn-path }}/articles ./${{ inputs.qiita-path }}/public
-        elif [ ${{ inputs.push-to-path }} = ${{ inputs.zenn-path }} ]; then
-          echo "[Warning]: Not implemented Qiita to Zenn"
+        if [ ${{ inputs.push-to-repo-name == inputs.qiita-repo-name }} ]; then
+          node zenn-qiita-actions/dist/index.js 0 ${{ inputs.zenn-repo-name }}/articles ${{ inputs.qiita-repo-name }}/public ${{ inputs.json-path }}
+        elif [ ${{ inputs.push-to-repo-name == inputs.zenn-repo-name }} ]; then
+          node zenn-qiita-actions/dist/index.js 1 ${{ inputs.qiita-repo-name }}/public ${{ inputs.zenn-repo-name }}/articles ${{ inputs.json-path }}
         else
-          echo "[Error]: Ivalid inputs 'push-to-path'. (must be the same as 'zenn-path' or 'qiita-path')"
+          echo "[Error]: Ivalid inputs 'push-to-repo-name'. (must be the same as 'zenn-repo-name' or 'qiita-repo-name')"
         fi
       shell: bash
 
     - name: Commit and push to repository
       run: |
-        cd ${{ inputs.qiita-path }}
+        cd ${{ inputs.push-to-repo-name }}
         git config user.name github-actions
         git config user.email actions@github.com
-        git add public/
+        if [ ${{ inputs.push-to-repo-name == inputs.qiita-repo-name }} ]; then
+          git add public/
+        elif [ ${{ inputs.push-to-repo-name == inputs.zenn-repo-name }} ]; then
+          git add articles/
+        else
+          echo "[Error]: Ivalid inputs 'push-to-repo-name'. (must be the same as 'zenn-repo-name' or 'qiita-repo-name')"
+        fi
         git commit -m "${{ inputs.commit-msg }}" || echo "Nothing to commit"
-        git remote set-url origin https://x-access-token:${{ inputs.git-token }}@github.com/${{ github.repository_owner }}/${{ inputs.push-to-path }}.git
+        git remote set-url origin https://x-access-token:${{ inputs.git-token }}@github.com/${{ github.repository_owner }}/${{ inputs.push-to-repo-name }}.git
         git push origin HEAD
       shell: bash
