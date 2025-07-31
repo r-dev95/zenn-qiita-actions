@@ -100,7 +100,7 @@ const convertAccordion = (md: string): string => {
 
 export const convertContentsZennToQiita = (config: AppConfig): Array<CallableFunction> => {
   let funcs = [convertDiffCodeBlock, convertServiceLink, convertCustomBlock, convertAccordion];
-  if (config.imageFormat === "img-tag") {
+  if (config.imageFormat === "tag") {
     funcs.push(convertMarkdownImagesToImgTags);
   } else {
     funcs.push(convertMarkdownImages);
