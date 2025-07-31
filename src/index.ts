@@ -58,9 +58,9 @@ function convert(inFilePath: string, outFilePath: string) {
     try {
       convert(inFilePath, outFilePath);
     } catch (e: any) {
-      console.log("inFilePath: " + inFilePath);
-      console.log("outFilePath: " + outFilePath);
-      console.log(e.message);
+      console.error("inFilePath: " + inFilePath);
+      console.error("outFilePath: " + outFilePath);
+      console.error(e.message);
     }
   });
 })();
