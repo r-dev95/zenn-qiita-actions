@@ -90,7 +90,7 @@ const convertAccordion = (md) => {
 };
 const convertContentsZennToQiita = (config) => {
     let funcs = [convertDiffCodeBlock, convertServiceLink, convertCustomBlock, convertAccordion];
-    if (config.imageFormat === "img-tag") {
+    if (config.imageFormat === "tag") {
         funcs.push(convertMarkdownImagesToImgTags);
     }
     else {
