@@ -23,7 +23,7 @@ inputs:
   json-path:
     description: GitHub token to push to <inputs.push-to-repo-name>
     required: false
-    default: "src/zenn-qiita-actions.json"
+    default: "dist/zenn-qiita-actions.json"
 
 runs:
   using: composite
@@ -46,28 +46,39 @@ runs:
         npm ci
       shell: bash
 
+    - name: Diff files
+      run: |
+        if [ ${{ inputs.push-to-repo-name == inputs.qiita-repo-name }} ]; then
+          cd ${{ inputs.zenn-repo-name }}
+        elif [ ${{ inputs.push-to-repo-name == inputs.zenn-repo-name }} ]; then
+          cd ${{ inputs.qiita-repo-name }}
+        else
+          echo "❌ [Failure] - Ivalid inputs 'push-to-repo-name'. (must be the same as 'zenn-repo-name' or 'qiita-repo-name')"
+          exit 1
+        fi
+        git diff --name-status ${{ github.event.before }} ${{ github.sha }} > diff.txt
+      shell: bash
+
     - name: Run converter
+      if: success()
       run: |
         if [ ${{ inputs.push-to-repo-name == inputs.qiita-repo-name }} ]; then
           node zenn-qiita-actions/dist/index.js 0 ${{ inputs.zenn-repo-name }}/articles ${{ inputs.qiita-repo-name }}/public ${{ inputs.json-path }}
-        elif [ ${{ inputs.push-to-repo-name == inputs.zenn-repo-name }} ]; then
-          node zenn-qiita-actions/dist/index.js 1 ${{ inputs.qiita-repo-name }}/public ${{ inputs.zenn-repo-name }}/articles ${{ inputs.json-path }}
         else
-          echo "[Error]: Ivalid inputs 'push-to-repo-name'. (must be the same as 'zenn-repo-name' or 'qiita-repo-name')"
+          node zenn-qiita-actions/dist/index.js 1 ${{ inputs.qiita-repo-name }}/public ${{ inputs.zenn-repo-name }}/articles ${{ inputs.json-path }}
         fi
       shell: bash
 
     - name: Commit and push to repository
+      if: success()
       run: |
         cd ${{ inputs.push-to-repo-name }}
         git config user.name github-actions
         git config user.email actions@github.com
         if [ ${{ inputs.push-to-repo-name == inputs.qiita-repo-name }} ]; then
           git add public/
-        elif [ ${{ inputs.push-to-repo-name == inputs.zenn-repo-name }} ]; then
-          git add articles/
         else
-          echo "[Error]: Ivalid inputs 'push-to-repo-name'. (must be the same as 'zenn-repo-name' or 'qiita-repo-name')"
+          git add articles/
         fi
         git commit -m "${{ inputs.commit-msg }}" || echo "Nothing to commit"
         git remote set-url origin https://x-access-token:${{ inputs.git-token }}@github.com/${{ github.repository_owner }}/${{ inputs.push-to-repo-name }}.git

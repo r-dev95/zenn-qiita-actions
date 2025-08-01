@@ -3,6 +3,7 @@ import matter from "gray-matter";
 import path from "path";
 
 import { AppConfig } from "./types";
+import { loadDiffFile } from "./diffFileLoader";
 import { getConvertMetaDataFunc } from "./convertMetaData";
 import { getConvertContentsFunc } from "./convertContents";
 
@@ -14,16 +15,25 @@ export class Converter {
   constructor(config: AppConfig) {
     this.config = config;
 
-    this.convertContentsFunc = getConvertContentsFunc(config);
     this.convertMetaDataFunc = getConvertMetaDataFunc(config);
+    this.convertContentsFunc = getConvertContentsFunc(config);
   }
 
-  convertMetaData(md: any) {
-    return this.convertMetaDataFunc(md);
+  convertMetaData(data: any): string {
+    return this.convertMetaDataFunc(data);
   }
 
-  convertContents(md: string) {
+  convertContents(md: string): string {
     return this.convertContentsFunc.reduce((acc, fn) => fn(acc), md);
+  }
+
+  updateId(newData: string, outFilePath: string): string {
+    if (this.config.toQiita && fs.existsSync(outFilePath)) {
+      const raw = fs.readFileSync(outFilePath, "utf-8");
+      const { data, content } = matter(raw);
+      newData = newData.replace("id: null", `id: ${data.id}`);
+    }
+    return newData;
   }
 
   convert(inFilePath: string, outFilePath: string) {
@@ -32,31 +42,43 @@ export class Converter {
 
     // convert meta data.
     let newData = this.convertMetaData(data);
+    // update id.
+    newData = this.updateId(newData, outFilePath);
 
     // convert content.
     const newContent = this.convertContents(content);
 
-    // update id.
-    if (fs.existsSync(outFilePath)) {
-      const raw = fs.readFileSync(outFilePath, "utf-8");
-      const { data, content } = matter(raw);
-      newData = newData.replace("id: null", `id: ${data.id}`);
-    }
-
     fs.writeFileSync(outFilePath, `${newData}${newContent}`);
   }
 
+  delete(inFilePath: string, outFilePath: string) {
+    if (!fs.existsSync(inFilePath) && fs.existsSync(outFilePath)) {
+      fs.rmSync(outFilePath);
+    }
+  }
+
   run() {
-    const fNames = fs.readdirSync(this.config.inputDir).filter((f) => f.endsWith(".md"));
-    fNames.forEach((fName) => {
-      const inFilePath = path.join(this.config.inputDir, fName);
-      const outFilePath = path.join(this.config.outputDir, fName);
+    const changeFiles = loadDiffFile(this.config.diffFilePath);
+    changeFiles.forEach((file) => {
+      const inFilePath = path.join(this.config.inputDir, file.fName);
+      const outFilePath = path.join(this.config.outputDir, file.fName);
       try {
-        this.convert(inFilePath, outFilePath);
-      } catch (e: any) {
-        console.error("inFilePath: " + inFilePath);
-        console.error("outFilePath: " + outFilePath);
-        console.error(e.message);
+        switch (file.status) {
+          case "A":
+          case "M":
+            this.convert(inFilePath, outFilePath);
+            console.log("✅ [Success] - convert " + inFilePath + " to " + outFilePath);
+            break;
+          case "D":
+            if (this.config.deleteOn) {
+              this.delete(inFilePath, outFilePath);
+              console.log("✅ [Success] - delete " + outFilePath);
+            }
+            break;
+        }
+      } catch (err: any) {
+        console.log("❌ [Failure] - " + inFilePath + " / " + outFilePath);
+        console.error(err.message);
       }
     });
   }
