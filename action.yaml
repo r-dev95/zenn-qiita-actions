@@ -39,39 +39,45 @@ runs:
         repository: r-dev95/zenn-qiita-actions
         path: zenn-qiita-actions
         ref: ${{ github.ref }}
+        fetch-depth: 0
 
     - name: Install dependencies
       run: |
+        echo "Install dependencies"
         cd zenn-qiita-actions
         npm ci
       shell: bash
 
     - name: Diff files
       run: |
+        echo "Diff files"
         if [ ${{ inputs.push-to-repo-name == inputs.qiita-repo-name }} ]; then
-          cd ${{ inputs.zenn-repo-name }}
+          git diff --name-status ${{ github.event.before }} ${{ github.sha }} | grep "^articles/.*\.md$" > zenn-qiita-actions/diff.txt
         elif [ ${{ inputs.push-to-repo-name == inputs.zenn-repo-name }} ]; then
-          cd ${{ inputs.qiita-repo-name }}
+          git diff --name-status ${{ github.event.before }} ${{ github.sha }} | grep "^public/.*\.md$" > zenn-qiita-actions/diff.txt
         else
           echo "❌ [Failure] - Ivalid inputs 'push-to-repo-name'. (must be the same as 'zenn-repo-name' or 'qiita-repo-name')"
           exit 1
         fi
-        git diff --name-status ${{ github.event.before }} ${{ github.sha }} > diff.txt
       shell: bash
 
     - name: Run converter
       if: success()
       run: |
+        echo "Run converter"
         if [ ${{ inputs.push-to-repo-name == inputs.qiita-repo-name }} ]; then
           node zenn-qiita-actions/dist/index.js 0 ${{ inputs.zenn-repo-name }}/articles ${{ inputs.qiita-repo-name }}/public ${{ inputs.json-path }}
         else
           node zenn-qiita-actions/dist/index.js 1 ${{ inputs.qiita-repo-name }}/public ${{ inputs.zenn-repo-name }}/articles ${{ inputs.json-path }}
         fi
+        if [[ -f "zenn-qiita-actions/diff.txt" ]]; then
+          rm zenn-qiita-actions/diff.txt
       shell: bash
 
     - name: Commit and push to repository
       if: success()
       run: |
+        echo "Commit and push to repository"
         cd ${{ inputs.push-to-repo-name }}
         git config user.name github-actions
         git config user.email actions@github.com
