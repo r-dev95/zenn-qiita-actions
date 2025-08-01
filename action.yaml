@@ -51,17 +51,18 @@ runs:
       run: |
         echo "Diff files"
         if [ ${{ inputs.push-to-repo-name == inputs.qiita-repo-name }} ]; then
-          cd ${{ inputs.zenn-repo-name }}
-          git diff --name-status ${{ github.event.before }} ${{ github.sha }} | grep "^A\?M\?D\?[[:space:]]*articles/.*\.md$" > ../zenn-qiita-actions/dist/diff.txt
+          git diff --name-status ${{ github.event.before }} ${{ github.sha }} | grep "^A\?M\?D\?[[:space:]]*articles/.*\.md$" > zenn-qiita-actions/dist/diff.txt
         elif [ ${{ inputs.push-to-repo-name == inputs.zenn-repo-name }} ]; then
-          cd ${{ inputs.qiita-repo-name }}
-          git diff --name-status ${{ github.event.before }} ${{ github.sha }} | grep "^A\?M\?D\?[[:space:]]*public/.*\.md$" > ../zenn-qiita-actions/dist/diff.txt
+          git diff --name-status ${{ github.event.before }} ${{ github.sha }} | grep "^A\?M\?D\?[[:space:]]*public/.*\.md$" > zenn-qiita-actions/dist/diff.txt
         else
           echo "❌ [Failure] - Ivalid inputs 'push-to-repo-name'. (must be the same as 'zenn-repo-name' or 'qiita-repo-name')"
           exit 1
         fi
         echo "Diff results:"
-        cat ../zenn-qiita-actions/dist/diff.txt
+        cat zenn-qiita-actions/dist/diff.txt
+        ls -laG zenn-qiita-actions
+        ls -laG zenn-docs
+        ls -laG qiita-docs
       shell: bash
 
     - name: Run converter
@@ -73,8 +74,8 @@ runs:
         else
           node zenn-qiita-actions/dist/index.js 1 ${{ inputs.qiita-repo-name }}/public ${{ inputs.zenn-repo-name }}/articles ${{ inputs.json-path }}
         fi
-        if [[ -f "../zenn-qiita-actions/dist/diff.txt" ]]; then
-          rm ../zenn-qiita-actions/dist/diff.txt
+        if [[ -f "zenn-qiita-actions/dist/diff.txt" ]]; then
+          rm zenn-qiita-actions/dist/diff.txt
       shell: bash
 
     - name: Commit and push to repository
