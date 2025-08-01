@@ -3,12 +3,18 @@ import fs from "fs";
 import { AppConfig, defaultConfig } from "./types";
 
 function validate(data: any): AppConfig {
-  const result: Partial<AppConfig> = {};
+  const res: Partial<AppConfig> = {};
 
-  result.toQiita = typeof data.toQiita === "boolean" ? data.toQiita : defaultConfig.toQiita;
-  result.imageFormat = typeof data.imageFormat === "string" ? data.imageFormat : defaultConfig.imageFormat;
+  res.toQiita = typeof data.toQiita === "boolean" ? data.toQiita : defaultConfig.toQiita;
+  res.inputDir = typeof data.inputDir === "string" ? data.inputDir : defaultConfig.inputDir;
+  res.outputDir = typeof data.outputDir === "string" ? data.outputDir : defaultConfig.outputDir;
+  res.diffFilePath = typeof data.diffFilePath === "string" ? data.diffFilePath : defaultConfig.diffFilePath;
 
-  return result as AppConfig;
+  // The following can be set by the user:
+  res.deleteOn = typeof data.deleteOn === "boolean" ? data.deleteOn : defaultConfig.deleteOn;
+  res.imageFormat = typeof data.imageFormat === "string" ? data.imageFormat : defaultConfig.imageFormat;
+
+  return res as AppConfig;
 }
 
 export function loadAppConfig(fPath: string): AppConfig {
@@ -18,7 +24,7 @@ export function loadAppConfig(fPath: string): AppConfig {
     const contents = fs.readFileSync(fPath, "utf-8");
     data = JSON.parse(contents);
   } catch (err) {
-    console.warn("Loading failed, using default config.", err);
+    console.warn("Loading app config failed, using default config.", err);
     return defaultConfig;
   }
   return validate(data);

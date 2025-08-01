@@ -11,5 +11,8 @@ exports.defaultConfig = {
     toQiita: true,
     inputDir: "",
     outputDir: "",
+    diffFilePath: "diff.txt",
+    // The following can be set by the user:
+    deleteOn: false,
     imageFormat: "normal",
 };
