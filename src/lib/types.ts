@@ -9,7 +9,7 @@ export interface AppConfig {
   toQiita: boolean;
   inputDir: string;
   outputDir: string;
-  imageFormat: string; // normal / tag
+  imageFormat: "normal" | "tag";
 }
 
 /**

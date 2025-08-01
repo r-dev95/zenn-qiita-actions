@@ -15,7 +15,7 @@ inputs:
     description: Repository path to push (<inputs.zenn-repo-name> or <inputs.qiita-repo-name>)
     required: true
   commit-msg:
-    description: Massage to commit to <inputs.push-to-repo-name>
+    description: Message to commit to <inputs.push-to-repo-name>
     required: true
   git-token:
     description: GitHub token to push to <inputs.push-to-repo-name>
