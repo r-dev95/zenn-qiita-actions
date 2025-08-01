@@ -42,48 +42,43 @@ runs:
 
     - name: Install dependencies
       run: |
-        echo "Install dependencies"
         cd zenn-qiita-actions
         npm ci
       shell: bash
 
     - name: Diff files
       run: |
-        echo "Diff files"
         if [ ${{ inputs.push-to-repo-name == inputs.qiita-repo-name }} ]; then
           cd ${{ inputs.zenn-repo-name }}
-          git diff --name-status ${{ github.event.before }} ${{ github.sha }} | grep "^A\?M\?D\?[[:space:]]*articles/.*\.md$" > ../zenn-qiita-actions/dist/diff.txt
+          git diff --name-status ${{ github.event.before }} ${{ github.sha }} | grep "^A\?M\?D\?[[:space:]]*articles/.*\.md$" > ../diff.txt
         elif [ ${{ inputs.push-to-repo-name == inputs.zenn-repo-name }} ]; then
           cd ${{ inputs.qiita-repo-name }}
-          git diff --name-status ${{ github.event.before }} ${{ github.sha }} | grep "^A\?M\?D\?[[:space:]]*public/.*\.md$" > ../zenn-qiita-actions/dist/diff.txt
+          git diff --name-status ${{ github.event.before }} ${{ github.sha }} | grep "^A\?M\?D\?[[:space:]]*public/.*\.md$" > ../diff.txt
         else
           echo "❌ [Failure] - Ivalid inputs 'push-to-repo-name'. (must be the same as 'zenn-repo-name' or 'qiita-repo-name')"
           exit 1
         fi
+
         echo "Diff results:"
-        cat ../zenn-qiita-actions/dist/diff.txt
-        ls -laGR ../zenn-qiita-actions
-        ls -laGR ../zenn-docs
-        ls -laGR ../qiita-docs
+        cat ../diff.txt
       shell: bash
 
     - name: Run converter
       if: success()
       run: |
-        echo "Run converter"
         if [ ${{ inputs.push-to-repo-name == inputs.qiita-repo-name }} ]; then
           node zenn-qiita-actions/dist/index.js 0 ${{ inputs.zenn-repo-name }}/articles ${{ inputs.qiita-repo-name }}/public ${{ inputs.json-path }}
         else
           node zenn-qiita-actions/dist/index.js 1 ${{ inputs.qiita-repo-name }}/public ${{ inputs.zenn-repo-name }}/articles ${{ inputs.json-path }}
         fi
-        if [[ -f "../zenn-qiita-actions/dist/diff.txt" ]]; then
-          rm ../zenn-qiita-actions/dist/diff.txt
+
+        if [[ -f "../diff.txt" ]]; then
+          rm ../diff.txt
       shell: bash
 
     - name: Commit and push to repository
       if: success()
       run: |
-        echo "Commit and push to repository"
         cd ${{ inputs.push-to-repo-name }}
         git config user.name github-actions[bot]
         git config user.email 41898282+github-actions[bot]@users.noreply.github.com
