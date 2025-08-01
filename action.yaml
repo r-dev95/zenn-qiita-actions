@@ -52,14 +52,16 @@ runs:
         echo "Diff files"
         if [ ${{ inputs.push-to-repo-name == inputs.qiita-repo-name }} ]; then
           cd ${{ inputs.zenn-repo-name }}
-          git diff --name-status ${{ github.event.before }} ${{ github.sha }} | grep "^articles/.*\.md$" > ../zenn-qiita-actions/diff.txt
+          git diff --name-status ${{ github.event.before }} ${{ github.sha }} | grep "^A\?M\?D\?[[:space:]]*articles/.*\.md$" > ../zenn-qiita-actions/diff.txt
         elif [ ${{ inputs.push-to-repo-name == inputs.zenn-repo-name }} ]; then
           cd ${{ inputs.qiita-repo-name }}
-          git diff --name-status ${{ github.event.before }} ${{ github.sha }} | grep "^public/.*\.md$" > ../zenn-qiita-actions/diff.txt
+          git diff --name-status ${{ github.event.before }} ${{ github.sha }} | grep "^A\?M\?D\?[[:space:]]*public/.*\.md$" > ../zenn-qiita-actions/diff.txt
         else
           echo "❌ [Failure] - Ivalid inputs 'push-to-repo-name'. (must be the same as 'zenn-repo-name' or 'qiita-repo-name')"
           exit 1
         fi
+        echo "Diff results:"
+        cat ../zenn-qiita-actions/diff.txt
       shell: bash
 
     - name: Run converter
