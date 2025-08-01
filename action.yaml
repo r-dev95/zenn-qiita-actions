@@ -74,6 +74,7 @@ runs:
 
         if [[ -f "../diff.txt" ]]; then
           rm ../diff.txt
+        fi
       shell: bash
 
     - name: Commit and push to repository
