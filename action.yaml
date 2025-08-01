@@ -62,9 +62,9 @@ runs:
         fi
         echo "Diff results:"
         cat ../zenn-qiita-actions/dist/diff.txt
-        ls -laG zenn-qiita-actions
-        ls -laG zenn-docs
-        ls -laG qiita-docs
+        ls -laGR ../zenn-qiita-actions
+        ls -laGR ../zenn-docs
+        ls -laGR ../qiita-docs
       shell: bash
 
     - name: Run converter
