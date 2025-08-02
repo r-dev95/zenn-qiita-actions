@@ -24,7 +24,7 @@ inputs:
   config-path:
     description: The config path for the Converter.
     required: false
-    default: "dist/syncConfig.json"
+    default: "dist/sync-config.json"
   zenn-contents-path:
     description: This is your Zenn content path.
     required: false
