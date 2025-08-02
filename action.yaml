@@ -34,20 +34,21 @@ inputs:
     required: false
     default: "public"
 
-env:
-  ACTIONS_REPO_NAME: zenn-qiita-actions
-  TO_ZENN: ${{ inputs.push-to-repo-name == inputs.zenn-repo-name }}
-  TO_QIITA: ${{ inputs.push-to-repo-name == inputs.qiita-repo-name }}
-  GREP_COND_ZENN: ^A\?M\?D\?[[:space:]]*${{ inputs.zenn-contents-path }}/.*\.md$
-  GREP_COND_QIITA: ^A\?M\?D\?[[:space:]]*${{ inputs.qiita-contents-path }}/.*\.md$
-  DIFF_FPATH: ../diff.txt
-  CONVERTER_FPATH: $ACTIONS_REPO_NAME/dist/index.js
-  ZENN_CONTENT_PATH: ${{ inputs.zenn-repo-name/inputs.zenn-contents-path }}
-  QIITA_CONTENT_PATH: ${{ inputs.qiita-repo-name/inputs.qiita-contents-path }}
-
 runs:
   using: composite
   steps:
+    - name: Setup env variables
+      run: |
+        echo "ACTIONS_REPO_NAME=zenn-qiita-actions" >> $GITHUB_ENV
+        echo "TO_ZENN=${{ inputs.push-to-repo-name == inputs.zenn-repo-name }}" >> $GITHUB_ENV
+        echo "TO_QIITA=${{ inputs.push-to-repo-name == inputs.qiita-repo-name }}" >> $GITHUB_ENV
+        echo "GREP_COND_ZENN=^A\?M\?D\?[[:space:]]*${{ inputs.zenn-contents-path }}/.*\.md$" >> $GITHUB_ENV
+        echo "GREP_COND_QIITA=^A\?M\?D\?[[:space:]]*${{ inputs.qiita-contents-path }}/.*\.md$" >> $GITHUB_ENV
+        echo "DIFF_FPATH=../diff.txt" >> $GITHUB_ENV
+        echo "CONVERTER_FPATH=$ACTIONS_REPO_NAME/dist/index.js" >> $GITHUB_ENV
+        echo "ZENN_CONTENT_PATH=${{ inputs.zenn-repo-name/inputs.zenn-contents-path }}" >> $GITHUB_ENV
+        echo "QIITA_CONTENT_PATH=${{ inputs.qiita-repo-name/inputs.qiita-contents-path }}" >> $GITHUB_ENV
+
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
