@@ -36,12 +36,13 @@ runs:
         echo "ZENN_CONTENT_PATH=${{ inputs.zenn-repo-name }}/articles" >> $GITHUB_ENV
         echo "QIITA_CONTENT_PATH=${{ inputs.qiita-repo-name }}/public" >> $GITHUB_ENV
         echo "TO_QIITA=${{ inputs.push-to-repo-name == inputs.qiita-repo-name }}" >> $GITHUB_ENV
+        echo "GIT_ADD_IMAGE_PATH=image" >> $GITHUB_ENV
         if [ ${{ inputs.push-to-repo-name == inputs.qiita-repo-name }} ]; then
           echo "GREP_COND=^A\?M\?D\?[[:space:]]*articles/.*\.md$" >> $GITHUB_ENV
-          echo "GIT_ADD_PATH=public" >> $GITHUB_ENV
+          echo "GIT_ADD_CONTENT_PATH=public" >> $GITHUB_ENV
         elif [ ${{ inputs.push-to-repo-name == inputs.zenn-repo-name }} ]; then
           echo "GREP_COND=^A\?M\?D\?[[:space:]]*public/.*\.md$" >> $GITHUB_ENV
-          echo "GIT_ADD_PATH=articles" >> $GITHUB_ENV
+          echo "GIT_ADD_CONTENT_PATH=articles" >> $GITHUB_ENV
         else
           echo "❌ [Failure] - Ivalid inputs 'push-to-repo-name'. (must be the same as 'zenn-repo-name' or 'qiita-repo-name')"
           exit 1
@@ -101,7 +102,8 @@ runs:
         cd ${{ inputs.push-to-repo-name }}
         git config user.name github-actions[bot]
         git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-        git add ${{ env.GIT_ADD_PATH }}
+        git add ${{ env.GIT_ADD_CONTENT_PATH }}
+        git add ${{ env.GIT_ADD_IMAGE_PATH }}
         git commit -m "${{ inputs.commit-msg }}" || echo "Nothing to commit"
         git remote set-url origin https://x-access-token:${{ inputs.git-token }}@github.com/${{ github.repository_owner }}/${{ inputs.push-to-repo-name }}.git
         git push origin HEAD
