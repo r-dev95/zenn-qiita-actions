@@ -46,8 +46,9 @@ runs:
         echo "GREP_COND_QIITA=^A\?M\?D\?[[:space:]]*${{ inputs.qiita-contents-path }}/.*\.md$" >> $GITHUB_ENV
         echo "DIFF_FPATH=../diff.txt" >> $GITHUB_ENV
         echo "CONVERTER_FPATH=$ACTIONS_REPO_NAME/dist/index.js" >> $GITHUB_ENV
-        echo "ZENN_CONTENT_PATH=${{ inputs.zenn-repo-name/inputs.zenn-contents-path }}" >> $GITHUB_ENV
-        echo "QIITA_CONTENT_PATH=${{ inputs.qiita-repo-name/inputs.qiita-contents-path }}" >> $GITHUB_ENV
+        echo "ZENN_CONTENT_PATH=${{ inputs.zenn-repo-name }}/${{ inputs.zenn-contents-path }}" >> $GITHUB_ENV
+        echo "QIITA_CONTENT_PATH=${{ inputs.qiita-repo-name }}/${{ inputs.qiita-contents-path }}" >> $GITHUB_ENV
+      shell: bash
 
     - name: Setup Node.js
       uses: actions/setup-node@v4
