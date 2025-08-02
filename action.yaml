@@ -59,23 +59,23 @@ runs:
       uses: actions/checkout@v4
       with:
         repository: r-dev95/${{ env.ACTIONS_REPO_NAME }}
-        path: $ACTIONS_REPO_NAME
+        path: ${{ env.ACTIONS_REPO_NAME }}
         ref: ${{ github.ref }}
 
     - name: Install dependencies
       run: |
-        cd $ACTIONS_REPO_NAME
+        cd ${{ env.ACTIONS_REPO_NAME }}
         npm ci
       shell: bash
 
     - name: Diff files
       run: |
-        if [ $TO_QIITA ]; then
+        if [ ${{ env.TO_QIITA }} ]; then
           cd ${{ inputs.zenn-repo-name }}
-          git diff --name-status ${{ github.event.before }} ${{ github.sha }} | grep $GREP_COND_ZENN > $DIFF_FPATH
+          git diff --name-status ${{ github.event.before }} ${{ github.sha }} | grep ${{ env.GREP_COND_ZENN }} > ${{ env.DIFF_FPATH }}
         elif [ $TO_ZENN ]; then
           cd ${{ inputs.qiita-repo-name }}
-          git diff --name-status ${{ github.event.before }} ${{ github.sha }} | grep $GREP_COND_QIITA > $DIFF_FPATH
+          git diff --name-status ${{ github.event.before }} ${{ github.sha }} | grep ${{ env.GREP_COND_QIITA }} > ${{ env.DIFF_FPATH }}
         else
           echo "❌ [Failure] - Ivalid inputs 'push-to-repo-name'. (must be the same as 'zenn-repo-name' or 'qiita-repo-name')"
           exit 1
@@ -90,14 +90,14 @@ runs:
     - name: Run converter
       if: success()
       run: |
-        if [ $TO_QIITA ]; then
-          node $CONVERTER_FPATH 0 $ZENN_CONTENT_PATH $QIITA_CONTENT_PATH ${{ inputs.config-path }}
+        if [ ${{ env.TO_QIITA }} ]; then
+          node ${{ env.CONVERTER_FPATH }} 0 ${{ env.ZENN_CONTENT_PATH }} ${{ env.QIITA_CONTENT_PATH }} ${{ inputs.config-path }}
         else
-          node $CONVERTER_FPATH 1 $QIITA_CONTENT_PATH $ZENN_CONTENT_PATH ${{ inputs.config-path }}
+          node ${{ env.CONVERTER_FPATH }} 1 ${{ env.QIITA_CONTENT_PATH }} ${{ env.ZENN_CONTENT_PATH }} ${{ inputs.config-path }}
         fi
 
-        if [[ -f $DIFF_FPATH ]]; then
-          rm $DIFF_FPATH
+        if [[ -f ${{ env.DIFF_FPATH }} ]]; then
+          rm ${{ env.DIFF_FPATH }}
         fi
       shell: bash
 
@@ -107,7 +107,7 @@ runs:
         cd ${{ inputs.push-to-repo-name }}
         git config user.name github-actions[bot]
         git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-        if [ $TO_QIITA ]; then
+        if [ ${{ env.TO_QIITA }} ]; then
           git add public/
         else
           git add articles/
