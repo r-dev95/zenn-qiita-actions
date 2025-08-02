@@ -137,7 +137,7 @@ class Converter {
                         this.convert(srcFilePath, dstFilePath);
                         console.log("✅ [Success] - convert " + srcFilePath + " to " + dstFilePath);
                         this.copyImage(srcImageDirPath, dstImageDirPath);
-                        console.log("✅ [Success] - copy image " + srcFilePath + " to " + dstFilePath);
+                        console.log("✅ [Success] - copy image " + srcImageDirPath + " to " + dstImageDirPath);
                         break;
                     case "D":
                         if (this.config.deleteOn) {
