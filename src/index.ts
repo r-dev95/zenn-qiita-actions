@@ -14,8 +14,8 @@ import { Converter } from "./lib/converter";
     process.exit(1);
   }
 
-  const _zennImageBaseDir = path.join(path.normalize(path.dirname(zennDir)), "image");
-  const _qiitaImageBaseDir = path.join(path.normalize(path.dirname(qiitaDir)), "image");
+  const _zennImageBaseDir = path.join(path.normalize(path.dirname(zennDir)), "images");
+  const _qiitaImageBaseDir = path.join(path.normalize(path.dirname(qiitaDir)), "images");
 
   const config = loadAppConfig(configFilePath);
   console.log(toQiitaFlag);

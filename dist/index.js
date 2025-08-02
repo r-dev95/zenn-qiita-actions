@@ -16,8 +16,8 @@ const converter_1 = require("./lib/converter");
         console.error("- <configFilePath>: Config file path");
         process.exit(1);
     }
-    const _zennImageBaseDir = path_1.default.join(path_1.default.normalize(path_1.default.dirname(zennDir)), "image");
-    const _qiitaImageBaseDir = path_1.default.join(path_1.default.normalize(path_1.default.dirname(qiitaDir)), "image");
+    const _zennImageBaseDir = path_1.default.join(path_1.default.normalize(path_1.default.dirname(zennDir)), "images");
+    const _qiitaImageBaseDir = path_1.default.join(path_1.default.normalize(path_1.default.dirname(qiitaDir)), "images");
     const config = (0, configLoader_1.loadAppConfig)(configFilePath);
     console.log(toQiitaFlag);
     console.log(typeof toQiitaFlag);
