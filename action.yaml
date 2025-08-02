@@ -83,7 +83,7 @@ runs:
 
         echo "--------------------------------------------------"
         echo "✅ [Success] - git diff"
-        cat $DIFF_FPATH
+        cat ${{ env.DIFF_FPATH }}
         echo "--------------------------------------------------"
       shell: bash
 
