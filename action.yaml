@@ -58,7 +58,7 @@ runs:
     - name: Checkout repository for zenn-qiita-actions
       uses: actions/checkout@v4
       with:
-        repository: r-dev95/$ACTIONS_REPO_NAME
+        repository: r-dev95/${{ env.ACTIONS_REPO_NAME }}
         path: $ACTIONS_REPO_NAME
         ref: ${{ github.ref }}
 
