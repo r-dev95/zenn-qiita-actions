@@ -36,7 +36,7 @@ runs:
         echo "ZENN_CONTENT_PATH=${{ inputs.zenn-repo-name }}/articles" >> $GITHUB_ENV
         echo "QIITA_CONTENT_PATH=${{ inputs.qiita-repo-name }}/public" >> $GITHUB_ENV
         echo "TO_QIITA=${{ inputs.push-to-repo-name == inputs.qiita-repo-name }}" >> $GITHUB_ENV
-        echo "GIT_ADD_IMAGE_PATH=image" >> $GITHUB_ENV
+        echo "GIT_ADD_IMAGE_PATH=images" >> $GITHUB_ENV
         if [ ${{ inputs.push-to-repo-name == inputs.qiita-repo-name }} ]; then
           echo "GREP_COND=^A\?M\?D\?[[:space:]]*articles/.*\.md$" >> $GITHUB_ENV
           echo "GIT_ADD_CONTENT_PATH=public" >> $GITHUB_ENV
