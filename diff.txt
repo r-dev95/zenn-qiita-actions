@@ -1,2 +1,0 @@
-M       first_test_articles.md
-A       add.md

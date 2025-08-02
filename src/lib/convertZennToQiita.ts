@@ -34,7 +34,7 @@ const convertImgLink = (md: string): string => {
       // remove image size
       .replace(/!\[(.*?)\]\((.*?)(?:\s*=\s*\d*x\d*)\)/g, "![$1]($2)")
       // convert url
-      .replace(/(!\[.*?\])\(\s*(\/image\/[^\s)]+)\s*\)/g, (_match, alt, path) => {
+      .replace(/(!\[.*?\])\(\s*(\/images\/[^\s)]+)\s*\)/g, (_match, alt, path) => {
         return `${alt}(${path.replace(/^\/images\//, "../images/")})`;
       })
   );
