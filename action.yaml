@@ -40,14 +40,19 @@ runs:
     - name: Setup env variables
       run: |
         echo "ACTIONS_REPO_NAME=sync-zenn-qiita" >> $GITHUB_ENV
-        echo "TO_ZENN=${{ inputs.push-to-repo-name == inputs.zenn-repo-name }}" >> $GITHUB_ENV
-        echo "TO_QIITA=${{ inputs.push-to-repo-name == inputs.qiita-repo-name }}" >> $GITHUB_ENV
-        echo "GREP_COND_ZENN=^A\?M\?D\?[[:space:]]*${{ inputs.zenn-contents-path }}/.*\.md$" >> $GITHUB_ENV
-        echo "GREP_COND_QIITA=^A\?M\?D\?[[:space:]]*${{ inputs.qiita-contents-path }}/.*\.md$" >> $GITHUB_ENV
         echo "DIFF_FPATH=../diff.txt" >> $GITHUB_ENV
         echo "CONVERTER_FPATH=sync-zenn-qiita/dist/index.js" >> $GITHUB_ENV
         echo "ZENN_CONTENT_PATH=${{ inputs.zenn-repo-name }}/${{ inputs.zenn-contents-path }}" >> $GITHUB_ENV
         echo "QIITA_CONTENT_PATH=${{ inputs.qiita-repo-name }}/${{ inputs.qiita-contents-path }}" >> $GITHUB_ENV
+        echo "TO_QIITA=${{ inputs.push-to-repo-name == inputs.qiita-repo-name }}" >> $GITHUB_ENV
+        if [ ${{ inputs.push-to-repo-name == inputs.qiita-repo-name }} ]; then
+          echo "GREP_COND=^A\?M\?D\?[[:space:]]*${{ inputs.zenn-contents-path }}/.*\.md$" >> $GITHUB_ENV
+        elif [ ${{ inputs.push-to-repo-name == inputs.zenn-repo-name }} ]; then
+          echo "GREP_COND=^A\?M\?D\?[[:space:]]*${{ inputs.qiita-contents-path }}/.*\.md$" >> $GITHUB_ENV
+        else
+          echo "❌ [Failure] - Ivalid inputs 'push-to-repo-name'. (must be the same as 'zenn-repo-name' or 'qiita-repo-name')"
+          exit 1
+        fi
       shell: bash
 
     - name: Setup Node.js
@@ -72,19 +77,20 @@ runs:
       run: |
         if [ ${{ env.TO_QIITA }} ]; then
           cd ${{ inputs.zenn-repo-name }}
-          git diff --name-status ${{ github.event.before }} ${{ github.sha }} | grep "${{ env.GREP_COND_ZENN }}" > ${{ env.DIFF_FPATH }}
-        elif [ ${{ env.TO_ZENN }} ]; then
-          cd ${{ inputs.qiita-repo-name }}
-          git diff --name-status ${{ github.event.before }} ${{ github.sha }} | grep "${{ env.GREP_COND_QIITA }}" > ${{ env.DIFF_FPATH }}
+          git diff --name-status ${{ github.event.before }} ${{ github.sha }} | grep "${{ env.GREP_COND }}" > ${{ env.DIFF_FPATH }}
         else
-          echo "❌ [Failure] - Ivalid inputs 'push-to-repo-name'. (must be the same as 'zenn-repo-name' or 'qiita-repo-name')"
-          exit 1
+          cd ${{ inputs.qiita-repo-name }}
+          git diff --name-status ${{ github.event.before }} ${{ github.sha }} | grep "${{ env.GREP_COND }}" > ${{ env.DIFF_FPATH }}
         fi
 
-        echo "--------------------------------------------------"
-        echo "✅ [Success] - git diff"
-        cat ${{ env.DIFF_FPATH }}
-        echo "--------------------------------------------------"
+        if [[ -f ${{ env.DIFF_FPATH }} ]]; then
+          echo "--------------------------------------------------"
+          echo "✅ [Success] - git diff"
+          cat ${{ env.DIFF_FPATH }}
+          echo "--------------------------------------------------"
+        else
+          echo "⚠️ [Warning] - No files have been updated."
+        fi
       shell: bash
 
     - name: Run converter
@@ -108,9 +114,9 @@ runs:
         git config user.name github-actions[bot]
         git config user.email 41898282+github-actions[bot]@users.noreply.github.com
         if [ ${{ env.TO_QIITA }} ]; then
-          git add public/
+          git add ${{ inputs.qiita-contents-path }}
         else
-          git add articles/
+          git add ${{ inputs.zenn-contents-path }}
         fi
         git commit -m "${{ inputs.commit-msg }}" || echo "Nothing to commit"
         git remote set-url origin https://x-access-token:${{ inputs.git-token }}@github.com/${{ github.repository_owner }}/${{ inputs.push-to-repo-name }}.git
