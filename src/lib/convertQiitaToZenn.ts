@@ -17,10 +17,27 @@ const convertDiffCodeBlock = (md: string): string => {
 };
 
 /**
+ * Convert urls.
+ *
+ * - `![alt](url)`
+ * - `![alt](url =300x)`
+ * - url: `../image/slug-name/xxx.png` -> `/image/slug-name/xxx.png`
+ *
+ * @param md Markdown to be converted
+ * @returns Converted markdown
+ */
+const convertImgLink = (md: string): string => {
+  return md.replace(/(!\[.*?\])\(\s*(\.\.\/image\/[^\s)]+)\s*\)/g, (_match, alt, path) => {
+    return `${alt}(${path.replace(/^\.\.\/image\//, "/image/")})`;
+  });
+};
+
+/**
  * Convert HTML \<img> tag to image link.
  *
  * - `<img src="url" alt="alt">` -> `![alt](url)`
  * - `<img src="url" alt="alt" width="300">` -> `![alt](url =300x)`
+ * - url: `../image/slug-name/xxx.png` -> `/image/slug-name/xxx.png`
  *
  * @param md Markdown to be converted
  * @returns Converted markdown
@@ -82,7 +99,13 @@ const convertAccordion = (md: string): string => {
  * @returns A list of conversion functions.
  */
 export const convertContentsQiitaToZenn = (config: AppConfig): Array<CallableFunction> => {
-  let funcs = [convertDiffCodeBlock, convertTagToImgLink, convertCustomBlockToZenn, convertAccordion];
+  let funcs = [
+    convertDiffCodeBlock,
+    convertTagToImgLink,
+    convertImgLink,
+    convertCustomBlockToZenn,
+    convertAccordion,
+  ];
   return funcs;
 };
 

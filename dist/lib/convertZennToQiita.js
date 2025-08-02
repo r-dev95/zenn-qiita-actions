@@ -16,10 +16,11 @@ const convertDiffCodeBlock = (md) => {
     return md.replace(/```diff\s/g, "```diff_");
 };
 /**
- * Remove image captions and size.
+ * Remove image captions and sizes and convert urls.
  *
  * - `![alt](url)\n*caption*` -> `![alt](url)`
  * - `![alt](url =300x)`     -> `![alt](url)`
+ * - url: `/image/slug-name/xxx.png` -> `../image/slug-name/xxx.png`
  *
  * @param md Markdown to be converted
  * @returns Converted markdown
@@ -29,14 +30,19 @@ const convertImgLink = (md) => {
         // remove image captions
         .replace(/(!\[.*?\]\(.*?\))\n\*.*?\*/g, "$1")
         // remove image size
-        .replace(/!\[(.*?)\]\((.*?)(?:\s*=\s*\d*x\d*)\)/g, "![$1]($2)"));
+        .replace(/!\[(.*?)\]\((.*?)(?:\s*=\s*\d*x\d*)\)/g, "![$1]($2)")
+        // convert url
+        .replace(/(!\[.*?\])\(\s*(\/image\/[^\s)]+)\s*\)/g, (_match, alt, path) => {
+        return `${alt}(${path.replace(/^\/image\//, "../image/")})`;
+    }));
 };
 /**
- * Convert image link to HTML \<img> tag.
+ * Convert image link to HTML \<img> tag and convert urls.
  *
  * - `![alt](url)` -> `<img src="url" alt="alt">`
  * - `![alt](url)\n*caption*` -> `<img src="url" alt="alt">`
  * - `![alt](url =300x)` -> `<img src="url" alt="alt" width="300">`
+ * - url: `/image/slug-name/xxx.png` -> `../image/slug-name/xxx.png`
  *
  * @param md Markdown to be converted
  * @returns Converted markdown
@@ -45,10 +51,11 @@ const convertImgLinkToTag = (md) => {
     return (md
         // remove image captions
         .replace(/(!\[.*?\]\(.*?\))\n\*.*?\*/g, "$1")
-        // convert to <img> tag
+        // convert to <img> tag and convert url
         .replace(/!\[(.*?)\]\((.*?)(?:\s*=\s*(\d*)x\d*)?\)/g, (_match, alt, url, width) => {
-        const widthAttr = width ? ` width="${width}"` : "";
-        return `<img src="${url}" alt="${alt}"${widthAttr}>`;
+        url = url.replace(/^\/image\//, "../image/");
+        width = width ? ` width="${width}"` : "";
+        return `<img src="${url}" alt="${alt}"${width}>`;
     }));
 };
 /**

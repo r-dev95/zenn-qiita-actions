@@ -6,8 +6,10 @@ exports.defaultConfig = void 0;
  */
 exports.defaultConfig = {
     toQiita: true,
-    inputDir: "",
-    outputDir: "",
+    srcDir: "",
+    dstDir: "",
+    srcImageBaseDir: "",
+    dstImageBaseDir: "",
     diffFilePath: "diff.txt",
     // The following can be set by the user:
     deleteOn: false,

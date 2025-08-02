@@ -3,8 +3,10 @@
  */
 export interface AppConfig {
   toQiita: boolean;
-  inputDir: string;
-  outputDir: string;
+  srcDir: string;
+  dstDir: string;
+  srcImageBaseDir: string;
+  dstImageBaseDir: string;
   diffFilePath: string;
 
   // The following can be set by the user:
@@ -17,8 +19,10 @@ export interface AppConfig {
  */
 export const defaultConfig: AppConfig = {
   toQiita: true,
-  inputDir: "",
-  outputDir: "",
+  srcDir: "",
+  dstDir: "",
+  srcImageBaseDir: "",
+  dstImageBaseDir: "",
   diffFilePath: "diff.txt",
 
   // The following can be set by the user:

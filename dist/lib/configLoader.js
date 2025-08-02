@@ -8,20 +8,17 @@ exports.loadAppConfig = loadAppConfig;
 const fs_1 = __importDefault(require("fs"));
 const types_1 = require("./types");
 /**
- * Complement app config.
+ * Complements user-configurable values in the app config.
  *
  * @param data config.
  * @returns App config.
  */
-function complement(data) {
-    const res = {};
-    res.toQiita = typeof data.toQiita === "boolean" ? data.toQiita : types_1.defaultConfig.toQiita;
-    res.inputDir = typeof data.inputDir === "string" ? data.inputDir : types_1.defaultConfig.inputDir;
-    res.outputDir = typeof data.outputDir === "string" ? data.outputDir : types_1.defaultConfig.outputDir;
-    res.diffFilePath = typeof data.diffFilePath === "string" ? data.diffFilePath : types_1.defaultConfig.diffFilePath;
-    // The following can be set by the user:
-    res.deleteOn = typeof data.deleteOn === "boolean" ? data.deleteOn : types_1.defaultConfig.deleteOn;
-    res.imageFormat = typeof data.imageFormat === "string" ? data.imageFormat : types_1.defaultConfig.imageFormat;
+function complementUserConfig(data) {
+    const res = types_1.defaultConfig;
+    if (typeof data.deleteOn === "boolean")
+        res.deleteOn = data.deleteOn;
+    if (typeof data.imageFormat === "string")
+        res.imageFormat = data.imageFormat;
     return res;
 }
 /**
@@ -40,18 +37,19 @@ function loadAppConfig(fPath) {
         console.warn("Loading app config failed, using default config.", err);
         return types_1.defaultConfig;
     }
-    return complement(data);
+    return complementUserConfig(data);
 }
 /**
  * Log output app config.
  */
 const logAppConfig = (config) => {
+    const maxKeyLen = Math.max(...Object.keys(config).map((k) => k.length)) + 1;
     console.log("--------------------------------------------------");
     console.log("App config:");
-    console.log("config.toQiita = " + config.toQiita);
-    console.log("config.inputDir = " + config.inputDir);
-    console.log("config.outputDir = " + config.outputDir);
-    console.log("config.imageFormat = " + config.imageFormat);
+    console.log("--------------------------------------------------");
+    Object.entries(config).forEach((values, num) => {
+        console.log(values[0].padEnd(maxKeyLen, " ") + ": " + values[1]);
+    });
     console.log("--------------------------------------------------");
 };
 exports.logAppConfig = logAppConfig;
