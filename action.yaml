@@ -73,7 +73,7 @@ runs:
         if [ ${{ env.TO_QIITA }} ]; then
           cd ${{ inputs.zenn-repo-name }}
           git diff --name-status ${{ github.event.before }} ${{ github.sha }} | grep ${{ env.GREP_COND_ZENN }} > ${{ env.DIFF_FPATH }}
-        elif [ $TO_ZENN ]; then
+        elif [ ${{ env.TO_ZENN }} ]; then
           cd ${{ inputs.qiita-repo-name }}
           git diff --name-status ${{ github.event.before }} ${{ github.sha }} | grep ${{ env.GREP_COND_QIITA }} > ${{ env.DIFF_FPATH }}
         else
