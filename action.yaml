@@ -20,19 +20,10 @@ inputs:
   git-token:
     description: The git token for pushing to <inputs.push-to-repo-name>.
     required: true
-
   config-path:
     description: The config path for the Converter.
     required: false
     default: "dist/sync-config.json"
-  zenn-contents-path:
-    description: This is your Zenn content path.
-    required: false
-    default: "articles"
-  qiita-contents-path:
-    description: This is your Qiita content path.
-    required: false
-    default: "public"
 
 runs:
   using: composite
@@ -42,13 +33,15 @@ runs:
         echo "ACTIONS_REPO_NAME=sync-zenn-qiita" >> $GITHUB_ENV
         echo "DIFF_FPATH=../diff.txt" >> $GITHUB_ENV
         echo "CONVERTER_FPATH=sync-zenn-qiita/dist/index.js" >> $GITHUB_ENV
-        echo "ZENN_CONTENT_PATH=${{ inputs.zenn-repo-name }}/${{ inputs.zenn-contents-path }}" >> $GITHUB_ENV
-        echo "QIITA_CONTENT_PATH=${{ inputs.qiita-repo-name }}/${{ inputs.qiita-contents-path }}" >> $GITHUB_ENV
+        echo "ZENN_CONTENT_PATH=${{ inputs.zenn-repo-name }}/articles" >> $GITHUB_ENV
+        echo "QIITA_CONTENT_PATH=${{ inputs.qiita-repo-name }}/public" >> $GITHUB_ENV
         echo "TO_QIITA=${{ inputs.push-to-repo-name == inputs.qiita-repo-name }}" >> $GITHUB_ENV
         if [ ${{ inputs.push-to-repo-name == inputs.qiita-repo-name }} ]; then
-          echo "GREP_COND=^A\?M\?D\?[[:space:]]*${{ inputs.zenn-contents-path }}/.*\.md$" >> $GITHUB_ENV
+          echo "GREP_COND=^A\?M\?D\?[[:space:]]*articles/.*\.md$" >> $GITHUB_ENV
+          echo "GIT_ADD_PATH=public" >> $GITHUB_ENV
         elif [ ${{ inputs.push-to-repo-name == inputs.zenn-repo-name }} ]; then
-          echo "GREP_COND=^A\?M\?D\?[[:space:]]*${{ inputs.qiita-contents-path }}/.*\.md$" >> $GITHUB_ENV
+          echo "GREP_COND=^A\?M\?D\?[[:space:]]*public/.*\.md$" >> $GITHUB_ENV
+          echo "GIT_ADD_PATH=articles" >> $GITHUB_ENV
         else
           echo "❌ [Failure] - Ivalid inputs 'push-to-repo-name'. (must be the same as 'zenn-repo-name' or 'qiita-repo-name')"
           exit 1
@@ -77,11 +70,10 @@ runs:
       run: |
         if [ ${{ env.TO_QIITA }} ]; then
           cd ${{ inputs.zenn-repo-name }}
-          git diff --name-status ${{ github.event.before }} ${{ github.sha }} | grep "${{ env.GREP_COND }}" > ${{ env.DIFF_FPATH }}
         else
           cd ${{ inputs.qiita-repo-name }}
-          git diff --name-status ${{ github.event.before }} ${{ github.sha }} | grep "${{ env.GREP_COND }}" > ${{ env.DIFF_FPATH }}
         fi
+        git diff --name-status ${{ github.event.before }} ${{ github.sha }} | grep "${{ env.GREP_COND }}" > ${{ env.DIFF_FPATH }}
 
         if [[ -f ${{ env.DIFF_FPATH }} ]]; then
           echo "--------------------------------------------------"
@@ -96,11 +88,7 @@ runs:
     - name: Run converter
       if: success()
       run: |
-        if [ ${{ env.TO_QIITA }} ]; then
-          node ${{ env.CONVERTER_FPATH }} 0 ${{ env.ZENN_CONTENT_PATH }} ${{ env.QIITA_CONTENT_PATH }} ${{ inputs.config-path }}
-        else
-          node ${{ env.CONVERTER_FPATH }} 1 ${{ env.QIITA_CONTENT_PATH }} ${{ env.ZENN_CONTENT_PATH }} ${{ inputs.config-path }}
-        fi
+        node ${{ env.CONVERTER_FPATH }} ${{ env.TO_QIITA }} ${{ env.ZENN_CONTENT_PATH }} ${{ env.QIITA_CONTENT_PATH }} ${{ inputs.config-path }}
 
         if [[ -f ${{ env.DIFF_FPATH }} ]]; then
           rm ${{ env.DIFF_FPATH }}
@@ -113,11 +101,7 @@ runs:
         cd ${{ inputs.push-to-repo-name }}
         git config user.name github-actions[bot]
         git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-        if [ ${{ env.TO_QIITA }} ]; then
-          git add ${{ inputs.qiita-contents-path }}
-        else
-          git add ${{ inputs.zenn-contents-path }}
-        fi
+        git add ${{ env.GIT_ADD_PATH }}
         git commit -m "${{ inputs.commit-msg }}" || echo "Nothing to commit"
         git remote set-url origin https://x-access-token:${{ inputs.git-token }}@github.com/${{ github.repository_owner }}/${{ inputs.push-to-repo-name }}.git
         git push origin HEAD

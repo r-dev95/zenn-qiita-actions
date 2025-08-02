@@ -3,24 +3,18 @@ import fs from "fs";
 import { AppConfig, defaultConfig } from "./types";
 
 /**
- * Complement app config.
+ * Complements user-configurable values in the app config.
  *
  * @param data config.
  * @returns App config.
  */
-function complement(data: any): AppConfig {
-  const res: Partial<AppConfig> = {};
+function complementUserConfig(data: any): AppConfig {
+  const res = defaultConfig;
 
-  res.toQiita = typeof data.toQiita === "boolean" ? data.toQiita : defaultConfig.toQiita;
-  res.inputDir = typeof data.inputDir === "string" ? data.inputDir : defaultConfig.inputDir;
-  res.outputDir = typeof data.outputDir === "string" ? data.outputDir : defaultConfig.outputDir;
-  res.diffFilePath = typeof data.diffFilePath === "string" ? data.diffFilePath : defaultConfig.diffFilePath;
+  if (typeof data.deleteOn === "boolean") res.deleteOn = data.deleteOn;
+  if (typeof data.imageFormat === "string") res.imageFormat = data.imageFormat;
 
-  // The following can be set by the user:
-  res.deleteOn = typeof data.deleteOn === "boolean" ? data.deleteOn : defaultConfig.deleteOn;
-  res.imageFormat = typeof data.imageFormat === "string" ? data.imageFormat : defaultConfig.imageFormat;
-
-  return res as AppConfig;
+  return res;
 }
 
 /**
@@ -39,18 +33,19 @@ export function loadAppConfig(fPath: string): AppConfig {
     console.warn("Loading app config failed, using default config.", err);
     return defaultConfig;
   }
-  return complement(data);
+  return complementUserConfig(data);
 }
 
 /**
  * Log output app config.
  */
 export const logAppConfig = (config: AppConfig) => {
+  const maxKeyLen = Math.max(...Object.keys(config).map((k) => k.length)) + 1;
   console.log("--------------------------------------------------");
   console.log("App config:");
-  console.log("config.toQiita = " + config.toQiita);
-  console.log("config.inputDir = " + config.inputDir);
-  console.log("config.outputDir = " + config.outputDir);
-  console.log("config.imageFormat = " + config.imageFormat);
+  console.log("--------------------------------------------------");
+  Object.entries(config).forEach((values, num) => {
+    console.log(values[0].padEnd(maxKeyLen, " ") + ": " + values[1]);
+  });
   console.log("--------------------------------------------------");
 };
