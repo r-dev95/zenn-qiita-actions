@@ -35,7 +35,7 @@ const convertImgLink = (md: string): string => {
       .replace(/!\[(.*?)\]\((.*?)(?:\s*=\s*\d*x\d*)\)/g, "![$1]($2)")
       // convert url
       .replace(/(!\[.*?\])\(\s*(\/image\/[^\s)]+)\s*\)/g, (_match, alt, path) => {
-        return `${alt}(${path.replace(/^\/image\//, "../image/")})`;
+        return `${alt}(${path.replace(/^\/images\//, "../images/")})`;
       })
   );
 };
@@ -58,7 +58,7 @@ const convertImgLinkToTag = (md: string): string => {
       .replace(/(!\[.*?\]\(.*?\))\n\*.*?\*/g, "$1")
       // convert to <img> tag and convert url
       .replace(/!\[(.*?)\]\((.*?)(?:\s*=\s*(\d*)x\d*)?\)/g, (_match, alt, url, width) => {
-        url = url.replace(/^\/image\//, "../image/");
+        url = url.replace(/^\/images\//, "../images/");
         width = width ? ` width="${width}"` : "";
         return `<img src="${url}" alt="${alt}"${width}>`;
       })

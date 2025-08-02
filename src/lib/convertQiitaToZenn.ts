@@ -28,7 +28,7 @@ const convertDiffCodeBlock = (md: string): string => {
  */
 const convertImgLink = (md: string): string => {
   return md.replace(/(!\[.*?\])\(\s*(\.\.\/image\/[^\s)]+)\s*\)/g, (_match, alt, path) => {
-    return `${alt}(${path.replace(/^\.\.\/image\//, "/image/")})`;
+    return `${alt}(${path.replace(/^\.\.\/images\//, "/images/")})`;
   });
 };
 
