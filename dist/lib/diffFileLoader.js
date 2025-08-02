@@ -6,6 +6,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.loadDiffFile = void 0;
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
+/**
+ * Loads a file with a list of files that have changed since the last push.
+ *
+ * @param fPath File path.
+ * @returns Changed file list.
+ */
 const loadDiffFile = (fPath) => {
     try {
         const data = fs_1.default.readFileSync(fPath, "utf-8");

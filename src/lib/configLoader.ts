@@ -2,7 +2,13 @@ import fs from "fs";
 
 import { AppConfig, defaultConfig } from "./types";
 
-function validate(data: any): AppConfig {
+/**
+ * Complement app config.
+ *
+ * @param data config.
+ * @returns App config.
+ */
+function complement(data: any): AppConfig {
   const res: Partial<AppConfig> = {};
 
   res.toQiita = typeof data.toQiita === "boolean" ? data.toQiita : defaultConfig.toQiita;
@@ -17,6 +23,12 @@ function validate(data: any): AppConfig {
   return res as AppConfig;
 }
 
+/**
+ * Load the app config.
+ *
+ * @param fPath File path.
+ * @returns App config.
+ */
 export function loadAppConfig(fPath: string): AppConfig {
   let data: unknown;
 
@@ -27,7 +39,7 @@ export function loadAppConfig(fPath: string): AppConfig {
     console.warn("Loading app config failed, using default config.", err);
     return defaultConfig;
   }
-  return validate(data);
+  return complement(data);
 }
 
 /**

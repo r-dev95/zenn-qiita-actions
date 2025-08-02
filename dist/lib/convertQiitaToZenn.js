@@ -7,7 +7,7 @@ exports.convertMetaDataQiitaToZenn = exports.convertContentsQiitaToZenn = void 0
 /**
  * Convert diff code block.
  *
- * ```diff_js -> ```diff js
+ * - ` ```diff_js` -> ` ```diff js`
  *
  * @param md Markdown to be converted
  * @returns Converted markdown
@@ -16,16 +16,16 @@ const convertDiffCodeBlock = (md) => {
     return md.replace("```diff_", "```diff ");
 };
 /**
- * Convert HTML <img> tags to Markdown image syntax.
+ * Convert HTML \<img> tag to image link.
  *
- * Handles:
- * - <img src="url" alt="alt" width="300"> → ![alt](url =300x)
+ * - `<img src="url" alt="alt">` -> `![alt](url)`
+ * - `<img src="url" alt="alt" width="300">` -> `![alt](url =300x)`
  *
- * @param html HTML string
- * @returns Markdown-converted string
+ * @param md Markdown to be converted
+ * @returns Converted markdown
  */
-const convertImgTagsToMarkdownImages = (html) => {
-    return html.replace(/<img\s+([^>]*?)\/?>/g, (_match, attrs) => {
+const convertTagToImgLink = (md) => {
+    return md.replace(/<img\s+([^>]*?)\/?>/g, (_match, attrs) => {
         const srcMatch = attrs.match(/src=["'](.*?)["']/);
         const altMatch = attrs.match(/alt=["'](.*?)["']/);
         const widthMatch = attrs.match(/width=["'](\d+)["']/);
@@ -37,7 +37,7 @@ const convertImgTagsToMarkdownImages = (html) => {
     });
 };
 /**
- * Convert Qiita-style custom block to Zenn-style.
+ * Convert custom block.
  *
  * - `:::note info` -> `:::message`
  * - `:::note warn` -> `:::message alert`
@@ -53,29 +53,36 @@ const convertCustomBlockToZenn = (md) => {
     return newContent;
 };
 /**
- * Convert HTML <details> accordion to Zenn-style block.
+ * Convert accordion.
  *
- * `<details><summary>title</summary>content</details>` -> `:::details title\ncontent\n:::`
+ * - `<details><summary>title</summary>content</details>` -> `:::details title\ncontent\n:::`
  *
  * @param md Markdown to be converted
  * @returns Converted markdown
  */
-const convertAccordionToZenn = (md) => {
+const convertAccordion = (md) => {
     return md.replace(/<details>\s*<summary>(.*?)<\/summary>\s*([\s\S]*?)<\/details>/g, (_match, title, content) => {
         const body = content.trim().replace(/\n{2,}/g, "\n"); // normalize newlines
         return `:::details ${title}\n${body}\n:::`;
     });
 };
+/**
+ * Set the conversion function.
+ *
+ * @param config App config.
+ * @returns A list of conversion functions.
+ */
 const convertContentsQiitaToZenn = (config) => {
-    let funcs = [
-        convertDiffCodeBlock,
-        convertImgTagsToMarkdownImages,
-        convertCustomBlockToZenn,
-        convertAccordionToZenn,
-    ];
+    let funcs = [convertDiffCodeBlock, convertTagToImgLink, convertCustomBlockToZenn, convertAccordion];
     return funcs;
 };
 exports.convertContentsQiitaToZenn = convertContentsQiitaToZenn;
+/**
+ * Convert markdown metadata in Qiita format to Zenn format.
+ *
+ * @param data Metadata to be converted.
+ * @returns Converted metadata.
+ */
 const convertMetaDataQiitaToZenn = (data) => {
     const emojiMatch = data.title.match(/^([\p{Emoji_Presentation}\p{Extended_Pictographic}])\s+(.*)/u);
     const emoji = emojiMatch ? emojiMatch[1] : "";

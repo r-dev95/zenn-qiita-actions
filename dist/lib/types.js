@@ -1,7 +1,4 @@
 "use strict";
-/**
- * Define the types.
- */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.defaultConfig = void 0;
 /**

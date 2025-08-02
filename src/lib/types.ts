@@ -1,8 +1,4 @@
 /**
- * Define the types.
- */
-
-/**
  * Define the interface for app config.
  */
 export interface AppConfig {

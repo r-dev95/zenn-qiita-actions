@@ -7,7 +7,13 @@ exports.logAppConfig = void 0;
 exports.loadAppConfig = loadAppConfig;
 const fs_1 = __importDefault(require("fs"));
 const types_1 = require("./types");
-function validate(data) {
+/**
+ * Complement app config.
+ *
+ * @param data config.
+ * @returns App config.
+ */
+function complement(data) {
     const res = {};
     res.toQiita = typeof data.toQiita === "boolean" ? data.toQiita : types_1.defaultConfig.toQiita;
     res.inputDir = typeof data.inputDir === "string" ? data.inputDir : types_1.defaultConfig.inputDir;
@@ -18,6 +24,12 @@ function validate(data) {
     res.imageFormat = typeof data.imageFormat === "string" ? data.imageFormat : types_1.defaultConfig.imageFormat;
     return res;
 }
+/**
+ * Load the app config.
+ *
+ * @param fPath File path.
+ * @returns App config.
+ */
 function loadAppConfig(fPath) {
     let data;
     try {
@@ -28,7 +40,7 @@ function loadAppConfig(fPath) {
         console.warn("Loading app config failed, using default config.", err);
         return types_1.defaultConfig;
     }
-    return validate(data);
+    return complement(data);
 }
 /**
  * Log output app config.

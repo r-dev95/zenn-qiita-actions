@@ -7,7 +7,7 @@ import { AppConfig } from "./types";
 /**
  * Convert diff code block.
  *
- * ```diff js -> ```diff_js
+ * - ` ```diff js` -> ` ```diff_js`
  *
  * @param md Markdown to be converted
  * @returns Converted markdown
@@ -17,7 +17,7 @@ const convertDiffCodeBlock = (md: string): string => {
 };
 
 /**
- * Remove image captions and size from Markdown image syntax.
+ * Remove image captions and size.
  *
  * - `![alt](url)\n*caption*` -> `![alt](url)`
  * - `![alt](url =300x)`     -> `![alt](url)`
@@ -25,33 +25,32 @@ const convertDiffCodeBlock = (md: string): string => {
  * @param md Markdown to be converted
  * @returns Converted markdown
  */
-const convertMarkdownImages = (md: string): string => {
+const convertImgLink = (md: string): string => {
   return (
     md
-      // Remove captions after images: `![alt](url)\n*caption*`
+      // remove image captions
       .replace(/(!\[.*?\]\(.*?\))\n\*.*?\*/g, "$1")
-      // Remove image size specification: `![alt](url =300x)`
+      // remove image size
       .replace(/!\[(.*?)\]\((.*?)(?:\s*=\s*\d*x\d*)\)/g, "![$1]($2)")
   );
 };
 
 /**
- * Convert markdown images (with optional size or caption) to HTML <img> tags.
+ * Convert image link to HTML \<img> tag.
  *
- * Handles:
- * - `![alt](url)`
- * - `![alt](url =300x)`
- * - `![alt](url)\n*caption*`
+ * - `![alt](url)` -> `<img src="url" alt="alt">`
+ * - `![alt](url)\n*caption*` -> `<img src="url" alt="alt">`
+ * - `![alt](url =300x)` -> `<img src="url" alt="alt" width="300">`
  *
- * @param md Markdown text
- * @returns HTML-converted string
+ * @param md Markdown to be converted
+ * @returns Converted markdown
  */
-const convertMarkdownImagesToImgTags = (md: string): string => {
+const convertImgLinkToTag = (md: string): string => {
   return (
     md
-      // Remove captions (e.g., *caption*) after image
+      // remove image captions
       .replace(/(!\[.*?\]\(.*?\))\n\*.*?\*/g, "$1")
-      // Convert markdown image to <img>, handling optional size (e.g., =300x)
+      // convert to <img> tag
       .replace(/!\[(.*?)\]\((.*?)(?:\s*=\s*(\d*)x\d*)?\)/g, (_match, alt, url, width) => {
         const widthAttr = width ? ` width="${width}"` : "";
         return `<img src="${url}" alt="${alt}"${widthAttr}>`;
@@ -60,21 +59,23 @@ const convertMarkdownImagesToImgTags = (md: string): string => {
 };
 
 /**
- * Convert service link.
+ * Convert embedded link to simple URL.
  *
- * `@[service](url)` -> `url`
+ * - `@[service](url)` -> `url`
  *
  * @param md Markdown to be converted
  * @returns Converted markdown
  */
-const convertServiceLink = (content: string): string => {
-  return content.replace(/@\[\w+\]\((.*?)\)/g, "$1");
+const convertEmbeddedLink = (md: string): string => {
+  return md.replace(/@\[\w+\]\((.*?)\)/g, "$1");
 };
 
 /**
  * Convert custom block.
- * `:::message` -> `:::note info`
- * `:::alert`   -> `:::note alert`
+ *
+ * - `:::message` -> `:::note info`
+ * - `:::alert`   -> `:::note alert`
+ *
  * @param md Markdown to be converted
  * @returns Converted markdown
  */
@@ -87,7 +88,7 @@ const convertCustomBlock = (md: string): string => {
 /**
  * Convert accordion.
  *
- * `:::details title\ncontent\n:::` -> `<details><summary>title</summary>content</details>`
+ * - `:::details title\ncontent\n:::` -> `<details><summary>title</summary>content</details>`
  *
  * @param md Markdown to be converted
  * @returns Converted markdown
@@ -98,16 +99,28 @@ const convertAccordion = (md: string): string => {
   });
 };
 
+/**
+ * Set the conversion function.
+ *
+ * @param config App config.
+ * @returns A list of conversion functions.
+ */
 export const convertContentsZennToQiita = (config: AppConfig): Array<CallableFunction> => {
-  let funcs = [convertDiffCodeBlock, convertServiceLink, convertCustomBlock, convertAccordion];
+  let funcs = [convertDiffCodeBlock, convertEmbeddedLink, convertCustomBlock, convertAccordion];
   if (config.imageFormat === "tag") {
-    funcs.push(convertMarkdownImagesToImgTags);
+    funcs.push(convertImgLinkToTag);
   } else {
-    funcs.push(convertMarkdownImages);
+    funcs.push(convertImgLink);
   }
   return funcs;
 };
 
+/**
+ * Convert markdown metadata in Zenn format to Qiita format.
+ *
+ * @param data Metadata to be converted.
+ * @returns Converted metadata.
+ */
 export const convertMetaDataZennToQiita = (data: any): string => {
   const title = `${data.emoji ? data.emoji + " " : ""}${data.title}`;
   let tags = "[]";
